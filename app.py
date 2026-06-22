@@ -534,7 +534,7 @@ def _render_portfolio_tab(
 
     styled = (
         df_tbl.style
-        .applymap(_clr_pct, subset=["Getiri %", "Kâr/Zarar (₺)"])
+        .map(_clr_pct, subset=["Getiri %", "Kâr/Zarar (₺)"])
         .format({
             "Alış (₺)": "₺{:.2f}", "Anlık (₺)": "₺{:.2f}",
             "Getiri %": "{:+.2f}%", "Kâr/Zarar (₺)": "₺{:+,.0f}",
@@ -887,9 +887,9 @@ def _render_signals_tab(portfolio: list[dict], current_prices: dict) -> None:
     fmt = {"Fiyat (₺)": "₺{:.2f}", "Getiri %": "{:+.2f}%", "Puan": "{:.1f}", "RelVol": "{:.2f}x"}
     styled_tbl = (
         df_tbl.style
-        .applymap(_clr_sig,   subset=["Sinyal"])
-        .applymap(_clr_ret,   subset=["Getiri %"])
-        .applymap(_clr_score, subset=["Puan"])
+        .map(_clr_sig,   subset=["Sinyal"])
+        .map(_clr_ret,   subset=["Getiri %"])
+        .map(_clr_score, subset=["Puan"])
         .format(fmt, na_rep="—")
         .hide(axis="index")
     )
