@@ -108,8 +108,14 @@ def generate_signal(
     target_price: Optional[float] = None,
     stop_loss: Optional[float] = None,
     quantity: float = 0.0,
+    price_override: Optional[float] = None,
 ) -> SignalResult:
-    """Hisse için kapsamlı teknik sinyal üretir."""
+    """Hisse için kapsamlı teknik sinyal üretir.
+
+    price_override: Gerçek anlık fiyat (fast_info kaynağı).
+    Verilirse gösterge hesaplamalarında değil, yalnızca
+    kâr/ekleme analizinde ve ekran gösteriminde kullanılır.
+    """
 
     result = SignalResult(ticker=ticker.upper())
 
@@ -133,7 +139,8 @@ def generate_signal(
     last = df_i.iloc[-1]
     prev = df_i.iloc[-2] if len(df_i) >= 2 else last
 
-    price   = _f(last.get("Close"))
+    # price_override varsa onu kullan (auto_adjust farkını gider)
+    price   = price_override if (price_override and price_override > 0) else _f(last.get("Close"))
     ma20    = _f(last.get("MA20"))
     ma50    = _f(last.get("MA50"))
     ma200   = _f(last.get("MA200"))
