@@ -603,9 +603,19 @@ def _render_analysis_tab(
         st.error(f"❌ {ticker} için veri alınamadı. Ticker'ı kontrol edin.")
         return
 
-    df_i   = add_all_indicators(df)
-    last   = df_i.iloc[-1]
-    price  = float(last["Close"])
+    df_i = add_all_indicators(df)
+
+    # Portföy sekmesiyle aynı kaynaktan fiyat al (auto_adjust farkını önler)
+    # Önce current_prices sözlüğüne bak (zaten çekilmiş olabilir), yoksa yeniden çek
+    live_price = current_prices.get(ticker.upper())
+    if not live_price or live_price <= 0:
+        with st.spinner("Anlık fiyat alınıyor…"):
+            live_price = fetch_current_price(ticker)
+
+    # Gösterge hesapları için df'nin son kapanışını kullan;
+    # ekran gösterimi ve kâr/ekleme analizi için live_price'ı kullan
+    last  = df_i.iloc[-1]
+    price = live_price if (live_price and live_price > 0) else float(last["Close"])
     chg, chg_pct = get_daily_change(df)
 
     # ── Fiyat Başlığı ─────────────────────────────────────────────
@@ -663,7 +673,8 @@ def _render_analysis_tab(
     qty     = stock_meta.get("quantity", 0)
 
     with st.spinner("Sinyal hesaplanıyor…"):
-        sig = generate_signal(df, ticker, buy_p, tgt_p, stop_p, qty)
+        sig = generate_signal(df, ticker, buy_p, tgt_p, stop_p, qty,
+                              price_override=live_price)
 
     if sig.error:
         st.warning(f"⚠️ Sinyal hesaplanamadı: {sig.error}")
